@@ -87,9 +87,8 @@ function validate_password () {
 
     # check is special character exist
     local special_chars="!@#$%^&*()_+[]{}|;:'\",.<>?~"
-    local found=false;
-    for ((i = 0; i < ${#password}; i++)); 
-    do
+    local found=false
+    for ((i = 0; i < ${#password}; i++)); do
         char="${password:i:1}"
         if [[ "$special_chars" == *"$char"* ]]; then
             found=true
@@ -269,7 +268,7 @@ cyberpanel createWebsite \
 	--email $wp_email \
 	--php $cp_php_version \
 	--ssl $cp_ssl \
-    --dkim $cp_dkim \
+	--dkim $cp_dkim \
 	--openBasedir $cp_openBasedir;
 
 # Create Database
@@ -311,7 +310,7 @@ sudo -u $web_user -i wp core install \
 
 echo "Apply your custom setup.."
 # update options
-sudo -u $web_user -i wp option update timezone_string $timezone --path=$web_dir;
+sudo -u $web_user -i wp option update timezone_string $timezone --path=$web_dir
 
 # set permalink
 echo "apache_modules:
@@ -322,15 +321,15 @@ sudo -u $web_user -i rm wp-cli.yml
 sudo systemctl restart lsws
 
 # Remove unnecessary plugins
-sudo -u $web_user -i wp plugin delete akismet --path=$web_dir;
-sudo -u $web_user -i wp plugin delete hello --path=$web_dir;
+sudo -u $web_user -i wp plugin delete akismet --path=$web_dir
+sudo -u $web_user -i wp plugin delete hello --path=$web_dir
 
 # Install necessary plugins
-sudo -u $web_user -i wp plugin install wpvivid-backuprestore --activate --path=$web_dir;
-sudo -u $web_user -i wp plugin install litespeed-cache --path=$web_dir;
+sudo -u $web_user -i wp plugin install wpvivid-backuprestore --activate --path=$web_dir
+sudo -u $web_user -i wp plugin install litespeed-cache --path=$web_dir
 
 # install theme
-sudo -u $web_user -i wp theme install astra --activate --path=$web_dir;
+sudo -u $web_user -i wp theme install astra --activate --path=$web_dir
 
 # remove inactive themes
 for theme in $(sudo -u $web_user -i wp theme list --field=name --status=inactive --path=$web_dir); do
