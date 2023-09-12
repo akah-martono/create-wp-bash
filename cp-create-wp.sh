@@ -248,7 +248,8 @@ db_user="${domain_name//[-.]/_}_$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head 
 # generate random password for database
 db_pass=$(openssl rand -base64 48 | cut -c1-$(shuf -i 20-30 -n 1))
 
-# Create Website
+# Create CP User
+echo "Creating Cyberpanel user.."
 cyberpanel createUser \
 	--firstName "$cp_first_name" \
 	--lastName "$cp_last_name" \
@@ -260,6 +261,7 @@ cyberpanel createUser \
 	--securityLevel HIGH;
 
 # Create Website
+echo "Creating website.."
 cyberpanel createWebsite \
 	--package $cp_package \
 	--owner $cp_username \
@@ -271,6 +273,7 @@ cyberpanel createWebsite \
 	--openBasedir $cp_openBasedir;
 
 # Create Database
+echo "Creating database.."
 cyberpanel createDatabase \
 	--databaseWebsite $domain_name \
 	--dbName $db_name \
@@ -282,11 +285,13 @@ web_dir="/home/$domain_name/public_html"
 web_user=$(ls -l $web_dir | tail -1 | cut -d ' ' -f 3)
 
 # Download WordPress
+echo "Downloading WordPress.."
 sudo -u $web_user -i wp core download \
 	--locale=$wp_locale \
 	--path=$web_dir;
 
 # Create config file
+echo "Creating config file.."
 sudo -u $web_user -i wp config create \
 	--dbname=$db_name \
 	--dbuser=$db_user \
@@ -295,6 +300,7 @@ sudo -u $web_user -i wp config create \
 	--path=$web_dir;
 
 # Install WordPress
+echo "Installing WordPress.."
 sudo -u $web_user -i wp core install \
 	--url="https://$domain_name" \
 	--title="$wp_title" \
@@ -303,6 +309,7 @@ sudo -u $web_user -i wp core install \
 	--admin_email=$wp_email \
 	--path=$web_dir;
 
+echo "Apply your custom setup.."
 # update options
 sudo -u $web_user -i wp option update timezone_string $timezone --path=$web_dir;
 
@@ -329,3 +336,5 @@ sudo -u $web_user -i wp theme install astra --activate --path=$web_dir;
 for theme in $(sudo -u $web_user -i wp theme list --field=name --status=inactive --path=$web_dir); do
     echo sudo -u $web_user -i wp theme delete $theme --path=$web_dir
 done
+
+echo "Done, your WordPress site is ready!"
